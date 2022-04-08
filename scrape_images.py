@@ -72,10 +72,15 @@ def main():
 
 
         for item in soup.findAll('img',{"src":True}): #for all images on webpage
-            if(product_id in item['src']): #if the source contains the product ID, (which is found at the end of the URL), add these to the HTML
+            if(product_id in item['src'] and not (".png" in item['src'])): #if the source contains the product ID, (which is found at the end of the URL), add these to the HTML
                 image_url_list.append(""" <div class="gallery-image item"> """ + """ <img src= """ + item['src'] + """></div> """)
 
         if len(image_url_list) == 0: #if there are no matches for a product ID, then add all images
+            for item in soup.findAll('img',{"src":True}):
+                if not ".png" in item['src']:
+                    image_url_list.append(""" <div class="gallery-image item"> """ + """ <img src= """ + item['src'] + """></div> """)
+
+        if len(image_url_list) == 0: #if the list is still empty, allow .png file types
             for item in soup.findAll('img',{"src":True}):
                 image_url_list.append(""" <div class="gallery-image item"> """ + """ <img src= """ + item['src'] + """></div> """)
 
