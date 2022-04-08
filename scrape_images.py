@@ -1,11 +1,21 @@
 import sys
 import re
+import urllib
 import requests 
 from bs4 import BeautifulSoup 
     
 def getdata(url): 
     r = requests.get(url) 
     return r.text 
+
+def take_page(self, url_page):
+    req = urllib.request.Request(
+        url_page,
+        data=None
+    )
+    f = urllib.request.urlopen(req)
+    page = f.read().decode('utf-8')
+    self.page = page
 
 def createHTMLFile(body):
     # to open/create a new html file in the write mode
@@ -72,19 +82,21 @@ def main():
 
 
         for item in soup.findAll('img',{"src":True}): #for all images on webpage
-            if(product_id in item['src'] and not (".png" in item['src'])): #if the source contains the product ID, (which is found at the end of the URL), add these to the HTML
+            if(product_id in item['src'] and ("http" in item['src']) and not (".png" and "data:image/svg+xml" in item['src'])): #if the source contains the product ID, (which is found at the end of the URL), add these to the HTML
                 image_url_list.append(""" <div class="gallery-image item"> """ + """ <img src= """ + item['src'] + """></div> """)
 
         if len(image_url_list) == 0: #if there are no matches for a product ID, then add all images
             for item in soup.findAll('img',{"src":True}):
-                if not ".png" in item['src']:
+                if (not (".png") and ("data:image/svg+xml") in item['src']) and ("http" in item['src']):
                     image_url_list.append(""" <div class="gallery-image item"> """ + """ <img src= """ + item['src'] + """></div> """)
 
         if len(image_url_list) == 0: #if the list is still empty, allow .png file types
             for item in soup.findAll('img',{"src":True}):
                 image_url_list.append(""" <div class="gallery-image item"> """ + """ <img src= """ + item['src'] + """></div> """)
 
-        ##TODO: weed out any image sources that include the words 'logo'
+        ##TODO: weed out any image sources that include the words 'logo'?
+        ##TODO: implement this solution to scrape amazon images: https://stackoverflow.com/questions/57260853/scrape-image-from-amazon-with-python-3-and-beautifulsoup
+        ## ALya skin care and apple also don't work, anthropology
 
         body = ''.join(image_url_list)
 
